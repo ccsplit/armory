@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ModuleTemplate
+from .ModuleTemplate import ModuleTemplate
 
 
-class Module(ModuleTemplate):
+class SampleModule(ModuleTemplate):
 
     name = "SampleModule"
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(SampleModule, self).set_options()
 
         self.options.add_argument("-p", "--print_message", help="Message to print")
 

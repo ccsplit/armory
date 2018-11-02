@@ -1,5 +1,5 @@
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import (
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import (
     BaseDomainRepository,
     DomainRepository,
     IPRepository,
@@ -8,7 +8,7 @@ from database.repositories import (
     VulnRepository,
     CVERepository,
 )
-from included.utilities import which, get_whois
+from ..utilities import which, get_whois
 import os
 import subprocess
 import pdb
@@ -26,7 +26,7 @@ if sys.version_info[0] >= 3:
     raw_input = input
 
 
-class Module(ToolTemplate):
+class Nmap(ToolTemplate):
     """
     Module for running nmap. Make sure to pass all nmap-specific arguments at the end, after --tool_args
 
@@ -47,7 +47,7 @@ class Module(ToolTemplate):
         self.ScopeCIDR = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Nmap, self).set_options()
         self.options.add_argument(
             "--hosts",
             help="Things to scan separated by a space. DO NOT USE QUOTES OR COMMAS",

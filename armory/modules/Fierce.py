@@ -1,13 +1,13 @@
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import BaseDomainRepository, DomainRepository
-from included.utilities.color_display import display, display_error
-from included.utilities import which
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import BaseDomainRepository, DomainRepository
+from ..utilities.color_display import display, display_error
+from ..utilities import which
 import os
 import re
 import pdb
 
 
-class Module(ToolTemplate):
+class Fierce(ToolTemplate):
 
     name = "Fierce"
     binary_name = "fierce"
@@ -18,7 +18,7 @@ class Module(ToolTemplate):
         self.Domain = DomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Fierce, self).set_options()
         self.options.add_argument("-d", "--domain", help="Target domain for Fierce")
         self.options.add_argument("-f", "--file", help="Import domains from file")
         self.options.add_argument(

@@ -1,15 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, DomainRepository
-from included.ModuleTemplate import ToolTemplate
+from ..database.repositories import BaseDomainRepository, DomainRepository
+from .ModuleTemplate import ToolTemplate
 from subprocess import check_output
-from included.utilities import which
+from ..utilities import which
 import shlex
 import os
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 
 
-class Module(ToolTemplate):
+class GobusterDNS(ToolTemplate):
 
     name = "GobusterDNS"
     binary_name = "gobuster"
@@ -20,7 +20,7 @@ class Module(ToolTemplate):
         self.Domain = DomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(GobusterDNS, self).set_options()
 
         self.options.add_argument("-d", "--domain", help="Domain to brute force")
         self.options.add_argument("-f", "--file", help="Import domains from file")

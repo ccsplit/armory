@@ -1,9 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, DomainRepository, UserRepository
-from included.ModuleTemplate import ToolTemplate
+from ..database.repositories import (
+    BaseDomainRepository,
+    DomainRepository,
+    UserRepository,
+)
+from .ModuleTemplate import ToolTemplate
 
-from included.utilities import which
+from ..utilities import which
 import shlex
 import os
 import pdb
@@ -11,7 +15,7 @@ import xmltodict
 from tld import get_tld
 
 
-class Module(ToolTemplate):
+class TheHarvester(ToolTemplate):
 
     name = "TheHarvester"
     binary_name = "theharvester"
@@ -23,7 +27,7 @@ class Module(ToolTemplate):
         self.User = UserRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(TheHarvester, self).set_options()
 
         self.options.add_argument("-d", "--domain", help="Domain to harvest")
         self.options.add_argument("-f", "--file", help="Import domains from file")

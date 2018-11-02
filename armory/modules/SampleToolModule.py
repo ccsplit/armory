@@ -1,15 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ToolTemplate
+from .ModuleTemplate import ToolTemplate
 
 
-class Module(ToolTemplate):
+class SampleToolModule(ToolTemplate):
 
     name = "SampleToolModule"
     binary_name = "sample-tool"
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(SampleToolModule, self).set_options()
 
         self.options.add_argument("-p", "--print_message", help="Message to print")
         # Change the default timeout

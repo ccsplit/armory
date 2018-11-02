@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import (
+from ..database.repositories import (
     DomainRepository,
     IPRepository,
     CIDRRepository,
@@ -9,12 +9,12 @@ from database.repositories import (
 )
 from tld import get_tld
 import dns.resolver
-from included.ModuleTemplate import ModuleTemplate
+from .ModuleTemplate import ModuleTemplate
 from netaddr import IPNetwork, IPAddress, iprange_to_cidrs
 from ipwhois import IPWhois
 import pdb
 import warnings
-from included.utilities.color_display import display, display_new, display_error
+from ..utilities.color_display import display, display_new, display_error
 import string
 
 
@@ -26,7 +26,7 @@ def check_string(s):
     return False
 
 
-class Module(ModuleTemplate):
+class Ingestor(ModuleTemplate):
     """
     Ingests domains and IPs. Domains get ip info and cidr info, and IPs get
     CIDR info.
@@ -44,7 +44,7 @@ class Module(ModuleTemplate):
         self.ScopeCIDR = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Ingestor, self).set_options()
 
         self.options.add_argument(
             "-d",

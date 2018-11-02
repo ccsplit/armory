@@ -1,17 +1,17 @@
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import (
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import (
     BaseDomainRepository,
     DomainRepository,
     ScopeCIDRRepository,
 )
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 import os
 import subprocess
 import json
 import pdb
 
 
-class Module(ToolTemplate):
+class DNSRecon(ToolTemplate):
 
     name = "DNSRecon"
     binary_name = "dnsrecon"
@@ -27,7 +27,7 @@ class Module(ToolTemplate):
         self.ScopeCIDR = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(DNSRecon, self).set_options()
         self.options.add_argument("-d", "--domain", help="Target domain for dnsRecon")
         self.options.add_argument("-f", "--file", help="Import domains from file")
         self.options.add_argument(

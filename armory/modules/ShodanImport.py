@@ -1,13 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ModuleTemplate
+from .ModuleTemplate import ModuleTemplate
 
-from database.repositories import PortRepository, IPRepository, ScopeCIDRRepository
+from ..database.repositories import PortRepository, IPRepository, ScopeCIDRRepository
 import time
 import os
 import sys
 import pdb
-from included.utilities.color_display import (
+from ..utilities.color_display import (
     display,
     display_error,
     display_warning,
@@ -18,7 +18,7 @@ import json
 from netaddr import IPNetwork
 
 
-class Module(ModuleTemplate):
+class ShodanImport(ModuleTemplate):
     """
     The Shodan module will either iterate through Shodan search results from net:<cidr>
     for all scoped CIDRs, or a custom search query. The resulting IPs and ports will be
@@ -35,7 +35,7 @@ class Module(ModuleTemplate):
         self.ScopeCidr = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(ShodanImport, self).set_options()
 
         self.options.add_argument(
             "-k", "--api_key", help="API Key for accessing Shodan"

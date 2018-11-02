@@ -1,16 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import DomainRepository, IPRepository, PortRepository
-from included.ModuleTemplate import ToolTemplate
+from ..database.repositories import DomainRepository, IPRepository, PortRepository
+from .ModuleTemplate import ToolTemplate
 import subprocess
-from included.utilities import which
+from ..utilities import which
 import shlex
 import os
 import pdb
 from multiprocessing import Pool as ThreadPool
 
 
-class Module(ToolTemplate):
+class SSLScan(ToolTemplate):
 
     name = "SSLScan"
     binary_name = "sslscan"
@@ -22,7 +22,7 @@ class Module(ToolTemplate):
         self.Port = PortRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(SSLScan, self).set_options()
 
         self.options.add_argument("-ho", "--host", help="Host to scan (host:port)")
         self.options.add_argument("-f", "--file", help="Import hosts from file")

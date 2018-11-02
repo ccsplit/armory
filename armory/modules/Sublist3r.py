@@ -1,13 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, DomainRepository
-from included.ModuleTemplate import ToolTemplate
-from included.utilities.color_display import display, display_error
+from ..database.repositories import BaseDomainRepository, DomainRepository
+from .ModuleTemplate import ToolTemplate
+from ..utilities.color_display import display, display_error
 import os
 import pdb
 
 
-class Module(ToolTemplate):
+class Sublist3r(ToolTemplate):
 
     name = "Sublist3r"
     binary_name = "sublist3r"
@@ -18,7 +18,7 @@ class Module(ToolTemplate):
         self.Domain = DomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Sublist3r, self).set_options()
 
         self.options.add_argument("-d", "--domain", help="Domain to brute force")
         self.options.add_argument("-f", "--file", help="Import domains from file")

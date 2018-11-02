@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ModuleTemplate
+from .ModuleTemplate import ModuleTemplate
 import re
-from included.utilities.get_urls import run as geturls
+from ..utilities.get_urls import run as geturls
 import requests
 import time
 import os
 
 
-class Module(ModuleTemplate):
+class URLScanner(ModuleTemplate):
     """
     This module is meant to scan for certain criteria over a large estate. Useful
     for searching for specific scenarios, such as "returns 401 while http".
@@ -21,7 +21,7 @@ class Module(ModuleTemplate):
         self.db = db
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(URLScanner, self).set_options()
 
         self.options.add_argument(
             "-sm", "--status_match", help="Status Codes that signify valid response"

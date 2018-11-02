@@ -1,5 +1,5 @@
-from included.ModuleTemplate import ModuleTemplate
-from database.repositories import (
+from .ModuleTemplate import ModuleTemplate
+from ..database.repositories import (
     BaseDomainRepository,
     DomainRepository,
     IPRepository,
@@ -8,28 +8,23 @@ from database.repositories import (
     CVERepository,
     ScopeCIDRRepository,
 )
-from included.utilities import which
-from included.utilities.sort_ranges import merge_ranges
+from ..utilities import which
+from ..utilities.sort_ranges import merge_ranges
 
 import os
 import re
-
-try:
-    from exceptions import IOError
-except:
-    pass
 
 from tld import get_tld
 import xml.etree.cElementTree as ET
 import requests
 import json
 import pdb
-from included.utilities.color_display import display, display_new, display_error
-from included.utilities.nessus import NessusRequest
+from ..utilities.color_display import display, display_new, display_error
+from ..utilities.nessus import NessusRequest
 import time
 
 
-class Module(ModuleTemplate):
+class Nessus(ModuleTemplate):
 
     name = "Nessus"
 
@@ -44,7 +39,7 @@ class Module(ModuleTemplate):
         self.ScopeCIDR = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Nessus, self).set_options()
         self.options.add_argument(
             "--import_file",
             help="Import separated Nessus files separated by a space. DO NOT USE QUOTES OR COMMAS",

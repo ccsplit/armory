@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from database.repositories import DomainRepository, BaseDomainRepository, IPRepository
-from included.ModuleTemplate import ToolTemplate
-from included.utilities import get_domain_ip
+from ..database.repositories import DomainRepository, BaseDomainRepository, IPRepository
+from .ModuleTemplate import ToolTemplate
+from ..utilities import get_domain_ip
 import io
 import os
 
 
-class Module(ToolTemplate):
+class Subfinder(ToolTemplate):
     name = "Subfinder"
     binary_name = "subfinder"
 
@@ -17,7 +17,7 @@ class Module(ToolTemplate):
         self.IPs = IPRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Subfinder, self).set_options()
         self.options.add_argument(
             "-a", "--bruteforce-all", help="Brute-force subdomains."
         )

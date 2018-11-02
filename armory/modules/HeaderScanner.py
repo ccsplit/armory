@@ -1,16 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ModuleTemplate
+from ..ModuleTemplate import ModuleTemplate
 import re
-from included.utilities.get_urls import run as geturls
-from database.repositories import PortRepository
+from ..utilities.get_urls import run as geturls
+from ..database.repositories import PortRepository
 import requests
 import time
 import os
 import sys
 import pdb
 from multiprocessing import Pool as ThreadPool
-from included.utilities.color_display import (
+from ..utilities.color_display import (
     display,
     display_error,
     display_warning,
@@ -18,7 +18,7 @@ from included.utilities.color_display import (
 )
 
 
-class Module(ModuleTemplate):
+class HeaderScanner(ModuleTemplate):
 
     name = "HeaderScanner"
 
@@ -27,7 +27,7 @@ class Module(ModuleTemplate):
         self.Port = PortRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(HeaderScanner, self).set_options()
 
         self.options.add_argument(
             "-t", "--timeout", help="Connection timeout (default 5)", default="5"

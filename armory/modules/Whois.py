@@ -1,16 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, ScopeCIDRRepository
-from included.ModuleTemplate import ToolTemplate
-from included.utilities import which
+from ..database.repositories import BaseDomainRepository, ScopeCIDRRepository
+from .ModuleTemplate import ToolTemplate
+from ..utilities import which
 import shlex
 import os
 import pdb
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 import json
 
 
-class Module(ToolTemplate):
+class Whois(ToolTemplate):
 
     name = "Whois"
     binary_name = "whois"
@@ -21,7 +21,7 @@ class Module(ToolTemplate):
         self.ScopeCidr = ScopeCIDRRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Whois, self).set_options()
 
         self.options.add_argument("-d", "--domain", help="Domain to query")
         self.options.add_argument("-c", "--cidr", help="CIDR to query")

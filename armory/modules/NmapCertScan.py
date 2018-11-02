@@ -1,19 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import PortRepository
-from included.ModuleTemplate import ToolTemplate
+from ..database.repositories import PortRepository
+from .ModuleTemplate import ToolTemplate
 import subprocess
-from included.utilities import which
+from ..utilities import which
 import shlex
 import os
 import pdb
 import xmltodict
 from multiprocessing import Pool as ThreadPool
 import glob
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 
 
-class Module(ToolTemplate):
+class NmapCertScan(ToolTemplate):
     """
     Runs nmap on all web hosts to pull certs and add them to the database
     """
@@ -26,7 +26,7 @@ class Module(ToolTemplate):
         self.Port = PortRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(NmapCertScan, self).set_options()
 
         self.options.add_argument(
             "-s",

@@ -1,7 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, DomainRepository, UserRepository
-from included.ModuleTemplate import ModuleTemplate
+from ..database.repositories import (
+    BaseDomainRepository,
+    DomainRepository,
+    UserRepository,
+)
+from .ModuleTemplate import ModuleTemplate
 import subprocess
 import os
 import pdb
@@ -15,7 +19,7 @@ except:
     from StringIO import StringIO as BytesIO
 
 
-class Module(ModuleTemplate):
+class PowerMeta(ModuleTemplate):
     """
     Unfortunately, this is a Windows only deal. So we output a list of commands
     to be run, and have a way of ingesting the output. Since metadata is more 
@@ -30,7 +34,7 @@ class Module(ModuleTemplate):
         self.User = UserRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(PowerMeta, self).set_options()
 
         self.options.add_argument(
             "-c",

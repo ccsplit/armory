@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
-from database.repositories import (
+from ..database.repositories import (
     IPRepository,
     DomainRepository,
     PortRepository,
     UrlRepository,
 )
-from included.ModuleTemplate import ToolTemplate
+from .ModuleTemplate import ToolTemplate
 from subprocess import Popen
-from included.utilities import which, get_urls
+from ..utilities import which, get_urls
 import shlex
 import os
 import pdb
@@ -26,7 +26,7 @@ if sys.version[0] == "3":
     xrange = range
 
 
-class Module(ToolTemplate):
+class Gowitness(ToolTemplate):
 
     name = "Gowitness"
     binary_name = "gowitness"
@@ -36,7 +36,7 @@ class Module(ToolTemplate):
         self.IPAddress = IPRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(Gowitness, self).set_options()
 
         self.options.add_argument(
             "-i",

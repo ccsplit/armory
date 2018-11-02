@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import DomainRepository
-from included.utilities.color_display import (
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import DomainRepository
+from ..utilities.color_display import (
     display_new,
     display_error,
     display_warning,
@@ -12,7 +12,7 @@ import os
 import pdb
 
 
-class Module(ToolTemplate):
+class TkoSubs(ToolTemplate):
     """
     This tool will check various subdomains for domain takeover vulnerabilities.
     """
@@ -25,7 +25,7 @@ class Module(ToolTemplate):
         self.Domain = DomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(TkoSubs, self).set_options()
 
         self.options.add_argument("--data", help="Path to the providers_data.csv file")
         self.options.add_argument(

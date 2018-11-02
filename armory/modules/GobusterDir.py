@@ -1,18 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import (
+from ..database.repositories import (
     IPRepository,
     DomainRepository,
     PortRepository,
     UrlRepository,
 )
-from included.ModuleTemplate import ToolTemplate
-from included.utilities import get_urls
+from .ModuleTemplate import ToolTemplate
+from ..utilities import get_urls
 import os
 import re
 import pdb
 from multiprocessing import Pool as ThreadPool
-from included.utilities.color_display import display, display_warning
+from ..utilities.color_display import display, display_warning
 import time
 
 try:
@@ -21,7 +21,7 @@ except ImportError:
     from urlparse import urlparse
 
 
-class Module(ToolTemplate):
+class GobusterDir(ToolTemplate):
 
     name = "GobusterDir"
     binary_name = "gobuster"
@@ -34,7 +34,7 @@ class Module(ToolTemplate):
         self.Url = UrlRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(GobusterDir, self).set_options()
 
         self.options.add_argument("-u", "--url", help="URL to brute force")
         self.options.add_argument("--file", help="Import URLs from file")

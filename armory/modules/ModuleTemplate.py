@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import argparse
 import sys
 
@@ -8,8 +8,8 @@ else:
     from subprocess import Popen
 
 from multiprocessing import Pool as ThreadPool
-from included.utilities.color_display import display, display_error
-from included.utilities import which
+from ..utilities.color_display import display, display_error
+from ..utilities import which
 import shlex
 import pdb
 import os
@@ -50,7 +50,6 @@ class ToolTemplate(ModuleTemplate):
 
     def set_options(self):
         super(ToolTemplate, self).set_options()
-
 
         self.options.add_argument("-b", "--binary", help="Path to the binary")
         self.options.add_argument(
@@ -221,4 +220,3 @@ def run_cmd(cmd):
 
     else:
         Popen(c).wait()
-

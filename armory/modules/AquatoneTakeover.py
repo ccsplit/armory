@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import BaseDomainRepository, DomainRepository
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import BaseDomainRepository, DomainRepository
 import os
 import json
 import pdb
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 
 
-class Module(ToolTemplate):
+class AquatoneTakeover(ToolTemplate):
 
     name = "Aquatone Takeover"
     binary_name = "aquatone-takeover"
@@ -19,7 +19,7 @@ class Module(ToolTemplate):
         self.BaseDomain = BaseDomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(AquatoneTakeover, self).set_options()
 
         self.options.add_argument(
             "-i",

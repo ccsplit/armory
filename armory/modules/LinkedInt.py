@@ -1,9 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import BaseDomainRepository, DomainRepository, UserRepository
-from included.ModuleTemplate import ModuleTemplate
+from ..database.repositories import (
+    BaseDomainRepository,
+    DomainRepository,
+    UserRepository,
+)
+from .ModuleTemplate import ModuleTemplate
 import subprocess
-from included.utilities import which
+from ..utilities import which
 import shlex
 import os
 import pdb
@@ -12,14 +16,14 @@ from tld import get_tld
 import csv
 import string
 from collections import Counter
-from included.utilities.color_display import display, display_error
+from ..utilities.color_display import display, display_error
 
 
 def remove_binary(txt):
     return "".join([t for t in txt if t in string.printable])
 
 
-class Module(ModuleTemplate):
+class LinkedInt(ModuleTemplate):
 
     name = "LinkedInt"
     binary_name = "linkedint.py"
@@ -30,7 +34,7 @@ class Module(ModuleTemplate):
         self.User = UserRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(LinkedInt, self).set_options()
 
         self.options.add_argument(
             "-b",

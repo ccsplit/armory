@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-from included.ModuleTemplate import ToolTemplate
-from database.repositories import BaseDomainRepository, DomainRepository
+from .ModuleTemplate import ToolTemplate
+from ..database.repositories import BaseDomainRepository, DomainRepository
 import os
 import json
-import pdb
 
 
-class Module(ToolTemplate):
+class AquatoneDiscover(ToolTemplate):
 
     name = "aquatone-discover"
     binary_name = "aquatone-discover"
@@ -18,7 +17,7 @@ class Module(ToolTemplate):
         self.BaseDomain = BaseDomainRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(AquatoneDiscover, self).set_options()
 
         self.options.add_argument("-d", "--domain", help="Target domain for aquatone")
         self.options.add_argument("-f", "--file", help="Import domains from file")

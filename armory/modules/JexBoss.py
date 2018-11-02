@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from database.repositories import (
+from ..database.repositories import (
     IPRepository,
     DomainRepository,
     PortRepository,
     UrlRepository,
 )
-from included.ModuleTemplate import ToolTemplate
+from .ModuleTemplate import ToolTemplate
 from subprocess import Popen
-from included.utilities import which, get_urls
+from ..utilities import which, get_urls
 import shlex
 import os
 import pdb
@@ -22,7 +22,7 @@ except ImportError:
     from urlparse import urlparse
 
 
-class Module(ToolTemplate):
+class JexBoss(ToolTemplate):
 
     name = "JexBoss"
     binary_name = "jexboss.py"
@@ -32,7 +32,7 @@ class Module(ToolTemplate):
         self.IPAddress = IPRepository(db, self.name)
 
     def set_options(self):
-        super(Module, self).set_options()
+        super(JexBoss, self).set_options()
 
         self.options.add_argument(
             "-i",
