@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import (
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import (
     DomainRepository,
     IPRepository,
     CIDRRepository,
@@ -11,7 +11,7 @@ import pdb
 import json
 
 
-class Report(ReportTemplate):
+class CidrReport(ReportTemplate):
     """
     This report displays all of the CIDR information, as well as the IP addresses and
     associated domains.

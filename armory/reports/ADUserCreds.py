@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from included.ReportTemplate import ReportTemplate
+from .ReportTemplate import ReportTemplate
 import pdb
 import json
 from fuzzywuzzy import process
 import datetime
 
 
-class Report(ReportTemplate):
+class ADUserCreds(ReportTemplate):
     """
     This report takes a dumped NTDS file and a cracked NTDS file (from hashcat).
     It will then match up users and passwords, as well as do a password
@@ -25,7 +25,7 @@ class Report(ReportTemplate):
         pass
 
     def set_options(self):
-        super(Report, self).set_options()
+        super(ADUserCreds, self).set_options()
 
         self.options.add_argument(
             "-ih", "--hashes", help="Input ntds export containing hashes"

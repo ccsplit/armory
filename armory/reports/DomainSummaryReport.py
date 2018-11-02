@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import BaseDomainRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import BaseDomainRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class DomainSummaryReport(ReportTemplate):
     """
     This is a domain summary report. It shows base domain, then
     all of the subdomains, along with any resolved IPs.

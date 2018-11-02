@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import ScopeCIDRRepository, BaseDomainRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import ScopeCIDRRepository, BaseDomainRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class WhoisReport(ReportTemplate):
     """
     Displays WHOIS records for domains and IPs.
     """

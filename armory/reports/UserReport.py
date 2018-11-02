@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import BaseDomainRepository, UserRepository, CredRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import BaseDomainRepository, UserRepository, CredRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class UserReport(ReportTemplate):
     """
     This report displays data related to discovered user accounts.
     """
@@ -21,7 +21,7 @@ class Report(ReportTemplate):
 
     def set_options(self):
 
-        super(Report, self).set_options()
+        super(UserReport, self).set_options()
 
         self.options.add_argument(
             "-u1",

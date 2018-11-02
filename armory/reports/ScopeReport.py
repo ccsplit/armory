@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import (
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import (
     IPRepository,
     BaseDomainRepository,
     DomainRepository,
@@ -11,7 +11,7 @@ import pdb
 import json
 
 
-class Report(ReportTemplate):
+class ScopeReport(ReportTemplate):
     """
     This report displays all of the various Base Domains, Domains, and IP Addresses with scoping information
     """
@@ -28,7 +28,7 @@ class Report(ReportTemplate):
         self.CIDRs = CIDRRepository(db)
 
     def set_options(self):
-        super(Report, self).set_options()
+        super(ScopeReport, self).set_options()
 
     def run(self, args):
 

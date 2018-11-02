@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import PortRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import PortRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class CertReport(ReportTemplate):
     """
     This report displays all of the certificates
     from https boxes.
@@ -20,7 +20,7 @@ class Report(ReportTemplate):
         self.Port = PortRepository(db)
 
     def set_options(self):
-        super(Report, self).set_options()
+        super(CertReport, self).set_options()
         self.options.add_argument("-t", "--tool", help="Source tool")
 
     def run(self, args):

@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import PortRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import PortRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class ServiceReport(ReportTemplate):
     """
     This report displays all of the hosts sorted by service.
     """

@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-from included.ReportTemplate import ReportTemplate
-from database.repositories import UserRepository
+from .ReportTemplate import ReportTemplate
+from ..database.repositories import UserRepository
 import pdb
 import json
 
 
-class Report(ReportTemplate):
+class EmailReport(ReportTemplate):
     """
     This report displays all of the found email addresses.
     """
@@ -18,7 +18,7 @@ class Report(ReportTemplate):
         self.User = UserRepository(db)
 
     def set_options(self):
-        super(Report, self).set_options()
+        super(EmailReport, self).set_options()
         self.options.add_argument("-t", "--tool", help="Source tool")
 
     def run(self, args):
