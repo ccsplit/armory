@@ -1,0 +1,6 @@
+include *.lock
+include Pipfile
+recursive-include mastertool Readme.md
+recursive-include mastertool *.md
+recursive-include mastertool *.py
+recursive-include mastertool *.sample
