@@ -9,16 +9,8 @@ from armory.database.repositories import (
 from ..ModuleTemplate import ToolTemplate
 from ..utilities import get_urls
 import os
-import re
-import pdb
-from multiprocessing import Pool as ThreadPool
-from ..utilities.color_display import display, display_warning
+from ..utilities.color_display import display_warning
 import time
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
 
 
 class Module(ToolTemplate):
@@ -36,7 +28,9 @@ class Module(ToolTemplate):
     def set_options(self):
         super(Module, self).set_options()
 
-        self.options.add_argument("-d", "--domain", help="Base domain to start crawling. ")
+        self.options.add_argument(
+            "-d", "--domain", help="Base domain to start crawling. "
+        )
         self.options.add_argument("--file", help="Import URLs from file")
         self.options.add_argument(
             "-i",
@@ -89,12 +83,7 @@ class Module(ToolTemplate):
 
         res = []
         for t in targets:
-            res.append(
-                {
-                    "target": t,
-                    "output": "{}/{}.txt".format(output_path, t)
-                }
-            )
+            res.append({"target": t, "output": "{}/{}.txt".format(output_path, t)})
 
         return res
 
