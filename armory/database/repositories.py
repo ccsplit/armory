@@ -98,8 +98,9 @@ class BaseRepository(object):
                 created = True
                 try:
                     obj = self.model.create(**kwargs)
-                except Exception:
-                    pdb.set_trace()
+                except Exception as e:
+                    print("Exception: {}".format(e))
+                    
                 meta = {self.toolname: {"created": str(datetime.datetime.now())}}
                 obj.meta = meta
                 obj.save()
@@ -125,8 +126,12 @@ class BaseRepository(object):
                     obj.save()
             return (created, obj)
 
+    def get_query(self):
+        return self.db.db_session.query(self.model), self.model
+
     def all(self, tool=False, scope_type="", **kwargs):
         # obj = self.db.db_session.query(self.model).all()
+        
         if scope_type == "passive":
             obj = (
                 self.db.db_session.query(self.model)
