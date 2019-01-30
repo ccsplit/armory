@@ -287,16 +287,22 @@ def run_report(Report, argv, report):
 
 
 def get_config_options(config_file=CONFIG_FILE):
-    config = ConfigParser()
-    def_config = os.path.join(CONFIG_FOLDER, config_file)
-    if config_file == CONFIG_FILE and not os.path.exists(def_config):
-        print(
-            "An error occurred while trying to create {}. Aborting!!".format(def_config)
-        )
-        raise ValueError("{} doesn't exist!".format(def_config))
-    config.read(os.path.join(CONFIG_FOLDER, config_file))
-
+    err_msg = (
+        "An error occurred while trying to get config options from: {}. Aborting!!"
+    )
+    def_config = config_file
     if config_file == CONFIG_FILE:
+        def_config = os.path.join(CONFIG_FOLDER, config_file)
+        if not os.path.exists(def_config):
+            print(err_msg.format(def_config))
+            raise ValueError("{} doesn't exist!".format(def_config))
+    elif not os.path.exists(def_config):
+        print(err_msg.format(def_config))
+        raise ValueError("{} doesn't exist!".format(def_config))
+    config = ConfigParser()
+    config.read(def_config)
+
+    if config and config.get("PROJECT", "base_path", fallback=None):
         if not os.path.exists(config["PROJECT"]["base_path"]):
             os.makedirs(config["PROJECT"]["base_path"])
     return config
