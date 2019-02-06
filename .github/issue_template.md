@@ -13,5 +13,5 @@
 ## Specifications
 
   - Python Version: `python --version`
-	- Pip packages: `pip freeze`
+  - Pip packages: `pip freeze`
   - Platform:
