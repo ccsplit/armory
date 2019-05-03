@@ -52,6 +52,7 @@ setup(
         "dnspython",
         "netaddr",
         "pyperclip",
+        "python-docx",
         "requests",
         "ipwhois",
         "whois",
