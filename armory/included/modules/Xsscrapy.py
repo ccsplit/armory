@@ -9,8 +9,12 @@ from armory.database.repositories import (
 from ..ModuleTemplate import ToolTemplate
 from ..utilities import get_urls
 import os
-from ..utilities.color_display import display_warning
+import re
+import pdb
+from multiprocessing import Pool as ThreadPool
+from ..utilities.color_display import display, display_warning, display_new
 import time
+import glob
 
 
 class Module(ToolTemplate):
@@ -65,31 +69,35 @@ class Module(ToolTemplate):
                 targets += get_urls.run(self.db, tool=self.name, scope_type="active")
 
         if args.output_path[0] == "/":
-            output_path = os.path.join(
+            self.output_path = os.path.join(
                 self.base_config["PROJECT"]["base_path"],
                 args.output_path[1:],
                 str(int(time.time())),
             )
 
         else:
-            output_path = os.path.join(
+            self.output_path = os.path.join(
                 self.base_config["PROJECT"]["base_path"],
                 args.output_path,
                 str(int(time.time())),
             )
 
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        if not os.path.exists(self.output_path):
+            os.makedirs(self.output_path)
 
         res = []
         for t in targets:
-            res.append({"target": t, "output": "{}/{}.txt".format(output_path, t)})
+            res.append(
+                {
+                    "target": t,
+                }
+            )
 
         return res
 
     def build_cmd(self, args):
 
-        cmd = self.binary + " -u http://{target} "
+        cmd = self.binary + " -u {target} "
 
         if args.tool_args:
             cmd += args.tool_args
@@ -102,6 +110,32 @@ class Module(ToolTemplate):
         os.chdir(os.path.dirname(self.binary))
 
     def process_output(self, cmds):
+
+        # Xsscrapy dumps results in its current directory.
+        hosts = {}
+        
+        for f in [g for g in glob.glob(os.path.dirname(self.binary) + '/*.txt') if 'requirements.txt' not in g]:
+            res = open(f).read()
+
+            if res[1:4] == 'URL': # This looks like results
+                data = res[1:].split('\n\n')
+                for d in data:
+                    host = d.split('\n')[0].split('/')[2]
+                    if not hosts.get(host, False):
+                        hosts[host] = []
+
+                    hosts[host].append(d)
+                os.unlink(f)
+
+        for h, v in hosts.items():
+            
+            display_new("Found data for {}".format(h))
+            f = open(os.path.join(self.output_path, "{}.txt".format(h.replace(':', '_'))), 'w')
+
+            for d in v:
+                display("URL: {}".format(d.split('\n')[0].split(' ')[1]))
+                f.write(d + '\n\n')
+
 
         display_warning(
             "There is currently no post-processing for this module. For the juicy results, refer to the output file paths."
