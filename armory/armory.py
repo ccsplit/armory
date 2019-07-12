@@ -298,8 +298,10 @@ def get_config_options(config_file=CONFIG_FILE):
             print(err_msg.format(def_config))
             raise ValueError("{} doesn't exist!".format(def_config))
     elif not os.path.exists(def_config):
-        print(err_msg.format(def_config))
-        raise ValueError("{} doesn't exist!".format(def_config))
+        def_config = os.path.join(CONFIG_FOLDER, config_file)
+        if not os.path.exists(def_config):
+            print(err_msg.format(def_config))
+            raise ValueError("{} doesn't exist!".format(def_config))
     config = ConfigParser()
     config.read(def_config)
 
@@ -399,17 +401,13 @@ def main():
                 mod = [m for m in modules if m.lower() == base_args.module.lower()]
 
                 if len(mod) > 0:
-                    list_module_options(
-                        os.path.join(custom_path, mod[0]), mod[0]
-                    )
+                    list_module_options(os.path.join(custom_path, mod[0]), mod[0])
                     sys.exit(0)
             modules = get_modules(os.path.join(PATH, "included/modules"))
-            mod = [m for m in modules if m.lower() == base_args.module.lower()]            
+            mod = [m for m in modules if m.lower() == base_args.module.lower()]
             if len(mod) > 0:
-                
-                list_module_options(
-                    ".included.modules." + mod[0], mod[0]
-                )
+
+                list_module_options(".included.modules." + mod[0], mod[0])
                 sys.exit(0)
 
         print("You must supply a valid module to get options for.")
@@ -425,9 +423,17 @@ def main():
         custom_path = config["PROJECT"].get("custom_modules", None)
         custom_modules = []
         if custom_path:
-            custom_modules = [m for m in get_modules(custom_path) if m.lower() == base_args.module.lower()]
+            custom_modules = [
+                m
+                for m in get_modules(custom_path)
+                if m.lower() == base_args.module.lower()
+            ]
 
-        modules = [m for m in get_modules(os.path.join(PATH, "included/modules")) if m.lower() == base_args.module.lower()]
+        modules = [
+            m
+            for m in get_modules(os.path.join(PATH, "included/modules"))
+            if m.lower() == base_args.module.lower()
+        ]
 
         if custom_modules:
             Module = load_module(os.path.join(custom_path, custom_modules[0]))
@@ -447,18 +453,24 @@ def main():
             custom_path = config["PROJECT"].get("custom_reports", None)
 
             if custom_path:
-                modules = [r for r in get_modules(custom_path) if r.lower() == base_args.report.lower()]
+                modules = [
+                    r
+                    for r in get_modules(custom_path)
+                    if r.lower() == base_args.report.lower()
+                ]
 
                 if modules:
                     list_report_options(
                         os.path.join(custom_path, modules[0]), modules[0]
                     )
                     sys.exit(0)
-            modules = [r for r in get_modules(os.path.join(PATH, "included/reports")) if r.lower() == base_args.report.lower()]
+            modules = [
+                r
+                for r in get_modules(os.path.join(PATH, "included/reports"))
+                if r.lower() == base_args.report.lower()
+            ]
             if modules:
-                list_report_options(
-                    ".included.reports." + modules[0], modules[0]
-                )
+                list_report_options(".included.reports." + modules[0], modules[0])
                 sys.exit(0)
 
         print("You must supply a valid report to get options for.")
@@ -474,9 +486,17 @@ def main():
         custom_path = config["PROJECT"].get("custom_reports", None)
         custom_reports = []
         if custom_path:
-            custom_reports = [r for r in get_modules(custom_path) if r.lower() == base_args.report.lower()]
+            custom_reports = [
+                r
+                for r in get_modules(custom_path)
+                if r.lower() == base_args.report.lower()
+            ]
 
-        reports = [r for r in get_modules(os.path.join(PATH, "included/reports")) if r.lower() == base_args.report.lower()]
+        reports = [
+            r
+            for r in get_modules(os.path.join(PATH, "included/reports"))
+            if r.lower() == base_args.report.lower()
+        ]
 
         if custom_reports:
             Report = load_module(os.path.join(custom_path, custom_reports[0]))

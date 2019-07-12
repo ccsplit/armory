@@ -51,6 +51,7 @@ setup(
         "tld",
         "dnspython",
         "netaddr",
+        "jinja2",
         "pyperclip",
         "python-docx",
         "requests",
