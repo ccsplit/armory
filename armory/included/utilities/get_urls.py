@@ -10,6 +10,8 @@ def run(db, tool=None, scope_type=None):
 
     ports = Port.all(service_name="http", tool=tool)
     ports += Port.all(service_name="https", tool=tool)
+    ports += Port.all(port_number=80, tool=tool)
+    ports += Port.all(port_number=443, tool=tool)
 
     for p in ports:
 
@@ -26,7 +28,10 @@ def run(db, tool=None, scope_type=None):
                 "%s://%s:%s" % (p.service_name, p.ip_address.ip_address, p.port_number)
             )
             for d in domain_list:
-                results.append("%s://%s:%s" % (p.service_name, d, p.port_number))
+                scheme = "http"
+                if p.service_name == "https" or p.port_number == 443:
+                    scheme = "https"
+                results.append("%s://%s:%s" % (scheme, d, p.port_number))
 
     return sort_by_url(results)
 
