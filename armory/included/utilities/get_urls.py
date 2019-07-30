@@ -23,9 +23,11 @@ def run(db, tool=None, scope_type=None):
         ):
 
             domain_list = [d.domain for d in p.ip_address.domains]
-
+            scheme = 'http'
+            if p.service_name == "https" or p.port_number == 443:
+                scheme = "https"
             results.append(
-                "%s://%s:%s" % (p.service_name, p.ip_address.ip_address, p.port_number)
+                "%s://%s:%s" % (scheme, p.ip_address.ip_address, p.port_number)
             )
             for d in domain_list:
                 scheme = "http"
