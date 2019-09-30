@@ -99,7 +99,7 @@ class Module(ModuleTemplate):
         for url in urls:
             if url[-1] == "/":
                 url = url[:-1]
-            if args.endpoint[0] == "/":
+            if args.endpoint[0] == "/" and len(args.endpoint) > 1:
                 args.endpoint = args.endpoint[1:]
 
             url = url + "/" + args.endpoint
