@@ -1,7 +1,7 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 MAINTAINER dlawson@depthsecurity.com
 
-RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
+RUN echo "deb-src http://deb.debian.org/debian bullseye main" >> /etc/apt/sources.list
 RUN apt update
 CMD ["echo", "Installing Debian packages needed."]
 RUN apt install -y python2 python3 git python3-pip python-pip libmariadb-dev-compat wget ruby ruby-dev gem p7zip-full dnsrecon hydra nmap whois git gcc make libpcap-dev libnet-ssleay-perl build-essential zlib1g-dev golang sudo chromium xclip
@@ -68,7 +68,7 @@ RUN ln -s /opt/src/DomLink/domLink.py /usr/local/bin/domLink.py
 RUN chmod +x /usr/local/bin/domLink.py
 WORKDIR /opt/src
 # Going to increment this everytime I want to update armory.
-RUN touch /tmp/revision16
+RUN touch /tmp/revision19
 RUN git clone https://github.com/depthsecurity/armory.git
 WORKDIR /opt/src/armory
 CMD ["echo", "Installing Armory"]
