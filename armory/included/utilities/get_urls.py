@@ -21,19 +21,24 @@ def run(db, tool=None, scope_type=None):
             or (scope_type == "passive" and p.ip_address.passive_scope)  # noqa: W503
             or not scope_type  # noqa: W503
         ):
-
-            domain_list = [d.domain for d in p.ip_address.domains]
-            scheme = 'http'
+            scheme = "http"
             if p.service_name == "https" or p.port_number == 443:
                 scheme = "https"
             results.append(
                 "%s://%s:%s" % (scheme, p.ip_address.ip_address, p.port_number)
             )
-            for d in domain_list:
+        domain_list = [d for d in p.ip_address.domains]
+
+        for d in domain_list:
+            if (
+                (scope_type == "active" and d.in_scope)
+                or (scope_type == "passive" and d.passive_scope)
+                or not scope_type
+            ):
                 scheme = "http"
                 if p.service_name == "https" or p.port_number == 443:
                     scheme = "https"
-                results.append("%s://%s:%s" % (scheme, d, p.port_number))
+                results.append("%s://%s:%s" % (scheme, d.domain, p.port_number))
 
     return sort_by_url(results)
 
