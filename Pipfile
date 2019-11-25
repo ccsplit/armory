@@ -13,6 +13,7 @@ verify_ssl = true
   readme_renderer = "*"
   flake8 = "*"
   mock = {version = "*",markers = "python_version < '3.4'"}
+  black = "*"
 
 [packages]
   configparser = "*"
