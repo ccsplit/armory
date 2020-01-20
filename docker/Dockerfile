@@ -23,6 +23,8 @@ RUN ln -s /root/go/bin/ffuf /usr/local/bin/ffuf
 RUN gem install aquatone
 RUN go get github.com/OJ/gobuster
 RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
+RUN go get github.com/hakluke/hakrawler
+RUN ln -s /root/go/bin/hakrawler /usr/local/bin/hakrawler
 RUN go get github.com/sensepost/gowitness
 RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
 RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
@@ -45,10 +47,8 @@ RUN make install
 RUN ln -s /opt/src/nikto/program /opt/nikto
 RUN ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
 WORKDIR /opt/src/pymeta
-RUN chmod +x setup.sh
-RUN ./setup.sh
-RUN chmod +x pymeta.py
-RUN ln -s /opt/src/pymeta/pymeta.py /usr/local/bin/pymeta
+RUN python3 setup.py install
+# RUN ln -s /opt/src/pymeta/pymeta.py /usr/local/bin/pymeta
 WORKDIR /opt/src/sslscan
 RUN apt-get build-dep openssl -y
 RUN make static
@@ -84,7 +84,7 @@ RUN make install
 
 WORKDIR /opt/src
 # Going to increment this everytime I want to update armory.
-RUN touch /tmp/revision19
+RUN touch /tmp/revision20
 RUN git clone https://github.com/depthsecurity/armory.git
 WORKDIR /opt/src/armory
 CMD ["echo", "Installing Armory"]
