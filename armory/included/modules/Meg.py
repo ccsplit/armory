@@ -32,8 +32,9 @@ class Module(ToolTemplate):
     def set_options(self):
         super(Module, self).set_options()
 
-        self.options.add_argument("-p", "--path", help="Path to check")
-        self.options.add_argument("--path_file", help="Import Paths from file")
+        self.options.add_argument(
+            "-p", "--path", help="Path/File to use for the meg path option."
+        )
 
         self.options.add_argument("-H", "--host", help="Host to check")
         self.options.add_argument("--host_file", help="Import Hosts from file")
@@ -106,10 +107,7 @@ class Module(ToolTemplate):
 
         cmd = self.binary
         cmd += " --verbose -s 200 -s 302 -s 301 -s 401"
-        if args.path_file:
-            cmd += " {}".format(args.path_file)
-        else:
-            cmd += " {}".format(args.path)
+        cmd += " {}".format(args.path)
         cmd += " {target} {output}"
 
         if args.tool_args:
