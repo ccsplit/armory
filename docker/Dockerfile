@@ -97,7 +97,7 @@ RUN git clone https://github.com/rbsec/sslscan && cd sslscan && make static && c
 
 
 FROM base as final
-COPY --from=go /go/bin/* /bin/
+COPY --from=go /gobins/bin/* /bin/
 COPY --from=makebuilds /bins/* /bin/
 RUN echo "deb-src http://deb.debian.org/debian buster main" >> /etc/apt/sources.list
 
@@ -117,4 +117,4 @@ CMD ["echo", "Cloning various repos"]
 #RUN git clone https://github.com/fang0654/DomLink.git
 #RUN git clone https://github.com/offensive-security/exploitdb.git
 
-RUN gem install aquatone
+#RUN gem install aquatone
