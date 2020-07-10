@@ -16,7 +16,6 @@ RUN tar zxfv go1.14.2.linux-amd64.tar.gz
 RUN ln -s /opt/src/golang/go/bin/go /usr/local/bin/
 RUN ln -s /opt/src/golang/go/bin/gofmt /usr/local/bin/
 RUN mkdir /root/go
-
 WORKDIR /opt/src
 
 CMD ["echo", "Cloning various repos"]
@@ -32,17 +31,19 @@ RUN git clone https://github.com/anshumanbh/tko-subs.git
 RUN git clone https://github.com/DanMcInerney/xsscrapy.git
 RUN git clone https://github.com/fang0654/Asnlookup.git
 RUN git clone https://github.com/fang0654/DomLink.git
-RUN git clone https://github.com/offensive-security/exploitdb.git
 
 # RUN go get github.com/ffuf/ffuf
 
 # Next couple of lines are to use custom version of ffuf until it gets updated
 RUN go get github.com/ffuf/ffuf
 
+RUN go get github.com/ffuf/ffuf
 RUN ln -s /root/go/bin/ffuf /usr/local/bin/ffuf
 RUN gem install aquatone
 RUN go get github.com/OJ/gobuster
 RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
+RUN go get github.com/hakluke/hakrawler
+RUN ln -s /root/go/bin/hakrawler /usr/local/bin/hakrawler
 RUN go get github.com/sensepost/gowitness
 RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
 RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
