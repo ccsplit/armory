@@ -114,7 +114,7 @@ class Module(ModuleTemplate):
             if args.top:
                 titles = [
                     user.job_title.split(" at ")[0]
-                    for user in domain.users
+                    for user in domain.user_set.all()
                     if user.job_title
                 ]
                 words = []
@@ -185,11 +185,11 @@ class Module(ModuleTemplate):
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        output_path = os.path.join(
+        file_path = os.path.join(
             output_path, "%s-linkedint" % domain.replace(".", "_")
         )
 
-        command_args = " -o %s" % output_path
+        command_args = " -o %s" % file_path
 
         command_args += " -e %s" % domain
         if args.keywords:
@@ -224,7 +224,7 @@ class Module(ModuleTemplate):
 
         os.chdir(current_dir)
         count = 0
-        with open(output_path + ".csv") as csvfile:
+        with open(file_path + ".csv") as csvfile:
             csvreader = csv.reader(csvfile, delimiter=",", quotechar='"')
 
             for row in csvreader:

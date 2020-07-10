@@ -8,7 +8,7 @@ from armory2.armory_main.models import (
 )
 from armory2.armory_main.included.ModuleTemplate import ToolTemplate
 from armory2.armory_main.included.utilities import get_urls
-from armory2.armory_main.included.utilities.color_display import display_warning, display
+from armory2.armory_main.included.utilities.color_display import display_warning, display, display_error
 import os
 import time
 import pdb
@@ -137,13 +137,13 @@ class Module(ToolTemplate):
 
             
             port = get_urls.get_port_object("blah://{}:{}".format(url, port_num))
+            if port:
+                if not port.meta.get('FFuF'):
+                    port.meta['FFuF'] = []
 
-            if not port.meta.get('FFuF'):
-                port.meta['FFuF'] = []
+                port.meta['FFuF'].append(cmd['output'])
 
-            port.meta['FFuF'].append(cmd['output'])
-
-            port.save()
+                port.save()
 
             
 

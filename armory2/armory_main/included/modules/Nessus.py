@@ -7,6 +7,7 @@ from armory2.armory_main.models import (
     Vulnerability,
     CVE,
     CIDR,
+    VulnOutput,
 )
 from armory2.armory_main.included.utilities.color_display import display, display_new, display_error
 from armory2.armory_main.included.utilities.nessus import NessusRequest
@@ -374,6 +375,7 @@ class Module(ModuleTemplate):
                     description=description,
                     remediation=solution,
                 )
+                
                 db_vuln.ports.add(db_port)
                 db_vuln.exploitable = exploitable
                 if exploitable:
@@ -403,17 +405,25 @@ class Module(ModuleTemplate):
             if tag.find("plugin_output") is not None:
                 
                 plugin_output = tag.find("plugin_output").text
-                if not db_vuln.meta.get('plugin_output', False):
-                    db_vuln.meta['plugin_output'] = {}
-                if not db_vuln.meta['plugin_output'].get(ip.ip_address, False):
-                    db_vuln.meta['plugin_output'][ip.ip_address] = {}
 
-                if not db_vuln.meta['plugin_output'][ip.ip_address].get(port, False):
-                    db_vuln.meta['plugin_output'][ip.ip_address][port] = []
+                db_output, created = VulnOutput.objects.get_or_create(port = db_port, vulnerability=db_vuln)
 
-                if plugin_output not in db_vuln.meta['plugin_output'][ip.ip_address][port]:
+                if created:
+                    # print("Plugin output added to database")
+                    db_output.data = plugin_output
+                    db_output.save()
+                      
+                # if not db_vuln.meta.get('plugin_output', False):
+                #     db_vuln.meta['plugin_output'] = {}
+                # if not db_vuln.meta['plugin_output'].get(ip.ip_address, False):
+                #     db_vuln.meta['plugin_output'][ip.ip_address] = {}
+
+                # if not db_vuln.meta['plugin_output'][ip.ip_address].get(port, False):
+                #     db_vuln.meta['plugin_output'][ip.ip_address][port] = []
+
+                # if plugin_output not in db_vuln.meta['plugin_output'][ip.ip_address][port]:
                 
-                    db_vuln.meta['plugin_output'][ip.ip_address][port].append(plugin_output)
+                #     db_vuln.meta['plugin_output'][ip.ip_address][port].append(plugin_output)
                 
 
             if not self.args.disable_mitre:
@@ -488,7 +498,7 @@ class Module(ModuleTemplate):
 
                 ip, created = IPAddress.objects.get_or_create(ip_address=hostIP, defaults={'active_scope':True, 'passive_scope':True})
 
-                if hostname:
+                if hostname and '.' in hostname: # Filter out the random hostnames that aren't fqdns
                     domain, created = Domain.objects.get_or_create(name=hostname)
 
                     if ip not in domain.ip_addresses.all():
