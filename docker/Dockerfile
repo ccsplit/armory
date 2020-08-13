@@ -105,7 +105,7 @@ CMD ["echo", "Installing Debian packages needed."]
 RUN apt update && apt install -y python python3 git python3-pip python-pip libmariadb-dev-compat\
       ruby ruby-dev gem dnsrecon hydra nmap whois libnet-ssleay-perl chromium xclip
 WORKDIR /src
-CMD ["echo", "Cloning various repos"]
+RUN echo "Cloning various repos"
 #RUN git clone https://github.com/joaomatosf/jexboss.git
 #RUN touch /tmp/linkedint2
 #RUN git clone https://github.com/fang0654/LinkedInt
