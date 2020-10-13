@@ -97,18 +97,13 @@ class Module(ModuleTemplate):
             command_args += " ".join(args.tool_args)
 
         if not args.no_binary:
-            # current_dir = os.getcwd()
-            print("{}\n{}\n{}".format(self.binary_name, self.binary, args.binary))
             new_dir = "/".join(self.binary.split("/")[:-1])
-
-            # os.chdir(new_dir)
 
             cmd = shlex.split("python3 " + self.binary + command_args)
             print("Executing: %s" % " ".join(cmd))
 
             subprocess.Popen(cmd).wait()
             print("Current directory: {}".format(os.getcwd()))
-            # os.chdir(current_dir)
 
         results = open(output_path).read().split("\n")
 
