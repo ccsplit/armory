@@ -13,7 +13,7 @@ from time import time
 import sys
 import json
 import pdb
-
+import sqlite3
 
 if sys.version[0] == "3":
     xrange = range
@@ -127,7 +127,7 @@ class Module(ToolTemplate):
     def build_cmd(self, args):
 
         command = (
-            self.binary + " file -D {output}/gowitness.db -d {output} -s {target} "
+            self.binary + " file -f {target} -D {output}/gowitness.db -P {output}  "
         )
 
         if args.tool_args:
@@ -142,46 +142,78 @@ class Module(ToolTemplate):
         """
 
         cwd = os.getcwd()
-        ver_pat = re.compile("gowitness:\s?(?P<ver>\d+\.\d+\.\d+)")
-        version = subprocess.getoutput("gowitness version")
-        command_change = LooseVersion("1.0.8")
-        gen_command = ["report", "generate"]
-        m = ver_pat.match(version)
-        if m:
-            if LooseVersion(m.group("ver")) <= command_change:
-                gen_command = ["generate"]
+        # ver_pat = re.compile("gowitness:\s?(?P<ver>\d+\.\d+\.\d+)")
+        # version = subprocess.getoutput("gowitness version")
+        # command_change = LooseVersion("1.0.8")
+        # gen_command = ["report", "generate"]
+        # m = ver_pat.match(version)
+        # if m:
+        #     if LooseVersion(m.group("ver")) <= command_change:
+        #         gen_command = ["generate"]
         for cmd in cmds:
             output = cmd["output"]
 
-            cmd = [self.binary] + gen_command
+            # cmd = [self.binary] + gen_command
             os.chdir(output)
 
 
 
-            subprocess.Popen(cmd, shell=False).wait()
+            # subprocess.Popen(cmd, shell=False).wait()
 
-            data = open(os.path.join(output, 'gowitness.db')).read().split('\n')
-            for d in data:
-                if '{"url"' in d:
+            conn = sqlite3.connect(os.path.join(output, 'gowitness.db'))
+
+            cr = conn.cursor()
+
+            domains = [d[0] for d in cr.execute('select distinct name from tls_certificate_dns_names').fetchall()]
+            for name in domains:
+                if '.' in name:
+                    domain, created = Domain.objects.get_or_create(name=name.lower())
+
+
+            for u in cr.execute('select id, url, filename, final_url, response_code from urls').fetchall():
+                port = get_port_object(u[1])
+                if not port:
+                    display_error("Port not found: {}".format(u[1]))
+                else:
+                    if not port.meta.get('Gowitness'):
+
+                        port.meta['Gowitness'] = []
+
                     
-                    j = json.loads(d)
+
+                    data = {
+                        'screenshot_file':os.path.join(output, u[2]),
+                        'final_url': u[3],
+                        'response_code_string': str(u[4]),
+                        'headers': [ {'key': k[0], 'value': k[1]} for k in cr.execute('select key, value from headers where url_id = ?', (u[0],))],
+                        'cert': {'dns_names':[ k[0] for k in cr.execute('select d.name from tls_certificate_dns_names as d inner join tls_certificates as tc on tc.id = d.tls_certificate_id inner join tls on tls.id = tc.tls_id where tls.url_id = ?', (u[0],))]}
+                        }
+
+
+
+                    port.meta['Gowitness'].append(data)
+
+                    port.save()
+            # for d in data:
+            #     if '{"url"' in d:
                     
-                    port = get_port_object(j['url'])
-                    if not port:
-                        display_error("Port not found: {}".format(j['url']))
-                    else:
-                        if not port.meta.get('Gowitness'):
-                            port.meta['Gowitness'] = []
+            #         j = json.loads(d)
+                    
+            #         port = get_port_object(j['url'])
+            #         if not port:
+            #             display_error("Port not found: {}".format(j['url']))
+            #         else:
+            #             if not port.meta.get('Gowitness'):
+            #                 port.meta['Gowitness'] = []
 
-                        port.meta['Gowitness'].append(j)
-                        port.save()
+            #             port.meta['Gowitness'].append(j)
+            #             port.save()
 
-                        if j.get('ssl_certificate') and 'peer_certificates' in j['ssl_certificate'] and j['ssl_certificate']['peer_certificates'] != None:
-                            for cert in j['ssl_certificate']['peer_certificates']:
-                                if cert and cert.get('dns_names') and cert['dns_names'] != None:
-                                    for name in cert['dns_names']:
-                                        if '.' in name:
-                                            domain, created = Domain.objects.get_or_create(name=name)
+            #             if j.get('ssl_certificate') and 'peer_certificates' in j['ssl_certificate'] and j['ssl_certificate']['peer_certificates'] != None:
+            #                 for cert in j['ssl_certificate']['peer_certificates']:
+            #                     if cert and cert.get('dns_names') and cert['dns_names'] != None:
+            #                         for name in cert['dns_names']:
+            
 
             os.chdir(cwd)
 

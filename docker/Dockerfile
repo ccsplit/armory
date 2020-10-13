@@ -46,9 +46,18 @@ RUN ln -s /root/go/bin/ffuf /usr/local/bin/ffuf
 RUN gem install aquatone
 RUN go get github.com/OJ/gobuster
 RUN ln -s /root/go/bin/gobuster /usr/local/bin/gobuster
-RUN go get github.com/sensepost/gowitness
-RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
-RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
+
+# Gowitness doesn't seem to be building right now - will just use the latest (at the time) release
+
+# RUN go get github.com/sensepost/gowitness
+# RUN ln -s /root/go/bin/gowitness /usr/local/bin/gowitness
+
+RUN wget https://github.com/sensepost/gowitness/releases/download/2.1.1/gowitness-2.1.1-linux-amd64 -O /usr/local/bin/gowitness
+RUN chmod +x /usr/local/bin/gowitness
+
+#RUN go get github.com/projectdiscovery/subfinder/cmd/subfinder
+
+RUN GO111MODULE=on go get -u -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
 RUN ln -s /root/go/bin/subfinder /usr/local/bin/subfinder
 # Run this to create the subfinder config, so it doesn't create a race condition causing others to error out as multiple threads try to create it at once
 RUN /usr/local/bin/subfinder -d domainthatdoesnotexits.biz -sources shodan
@@ -83,6 +92,18 @@ RUN ln -s /opt/src/Sublist3r/sublist3r.py /usr/local/bin/sublist3r
 RUN go get github.com/anshumanbh/tko-subs
 RUN ln -s /root/go/bin/tko-subs /usr/local/bin/tko-subs
 RUN ln -s /root/go/src/github.com/anshumanbh/tko-subs/providers-data.csv /usr/local/bin/providers-data.csv
+
+
+# Install amass - for whatever reason, I haven't been able to get the go get to work
+#ENV GO111MODULE on
+#RUN go get -v github.com/OWASP/Amass/v3
+#RUN ln -s /root/go/bin/amass /usr/local/bin/amass
+
+WORKDIR /opt/src/amass
+RUN wget https://github.com/OWASP/Amass/releases/download/v3.10.2/amass_linux_amd64.zip
+RUN unzip amass_linux_amd64.zip
+RUN ln -s /opt/src/amass/amass_linux_amd64/amass /usr/local/bin/
+
 WORKDIR /opt/src/xsscrapy
 RUN pip install -r requirements.txt
 ENV PATH="${PATH}:/opt/src/xsscrapy"
@@ -100,7 +121,7 @@ RUN ln -s /opt/src/exploitdb/searchsploit /usr/local/bin/searchsploit
 WORKDIR /opt/src
 
 # Going to increment this everytime I want to update armory.
-RUN touch /tmp/revision111
+RUN touch /tmp/revision120
 
 
 

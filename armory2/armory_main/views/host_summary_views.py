@@ -49,6 +49,10 @@ def get_hosts(request):
 
     search = request.POST.get('search')
 
+    page = int(request.POST.get('page', '0'))
+    entries = int(request.POST.get('entries', '50'))
+    # entries = 50
+
     if request.POST.get('display_notes'):
         display_notes = "collapse show"
     else:
@@ -77,7 +81,23 @@ def get_hosts(request):
     display_complete = request.POST.get('display_completed')
 
     ips_object = {}
-    ips = IPAddress.get_sorted(scope_type=scope_type, search=search)
+    ips, total = IPAddress.get_sorted(scope_type=scope_type, search=search, display_zero=display_zero, page_num=page, entries=entries)
+
+    total_pages = int((total - 1) / entries) + 1
+
+    
+
+    page_data = {'prev': True if page > 1 else False,
+                 'next': True if page < total_pages else False,
+                 'pages_high': [i for i in range(page+1, page+6) if i <= total_pages],
+                 'pages_low':  [i for i in range(page - 5, page) if i >= 1],
+                 'current_page': page,
+                 'last_page':total_pages,
+                 'prev_page': page - 1 if page > 1 else 1,
+                 'next_page': page + 1 if page < total_pages else total_pages,
+                 }
+
+
 
     data = {}
     good_ips = []
@@ -122,8 +142,8 @@ def get_hosts(request):
                             if 'FFuF-empty' not in data[p.id]:
                                 data[p.id].append('FFuF-empty')
 
-
-    host_html = loader.get_template('host_summary/host_summary_data.html').render({'ips':good_ips, 'data':data, 'display_notes':display_notes, 'display_zero': display_zero})
+    # pdb.set_trace()
+    host_html = loader.get_template('host_summary/host_summary_data.html').render({'ips':good_ips, 'data':data, 'display_notes':display_notes, 'display_zero': display_zero, 'page_data':page_data})
     sidebar_html = loader.get_template('host_summary/sidebar.html').render({'ips':good_ips})
 
     return HttpResponse(json.dumps({'hostdata':host_html, 'sidebardata': sidebar_html}))
@@ -154,7 +174,15 @@ def save_notes(request, ip_id):
     return HttpResponse("Success")
 def get_nessus(request, port_id):
 
+    vuln_data = []
     vulns = Vulnerability.objects.filter(ports__id=port_id).order_by('severity')[::-1]
+
+    # for v in vulns:
+    #     vuln_output_item = v.vulnoutput_set.filter(port__id=port_id)
+    #     vo = "" if not vuln_output_item else vuln_output_item[0].data
+
+    #     vuln_data.append( {"id": v.id, "name": v.name, "severity": v.severity, "description": v.description, "vulnoutput": vo })
+
     sev_map = {0: 'Informational', 1: 'Low', 2:'Medium', 3:'High', 4:'Critical'}
 
     return render(request, 'host_summary/nessus.html', {'vulns':vulns, 'sev_map':sev_map})
