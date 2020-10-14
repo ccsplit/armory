@@ -8,13 +8,14 @@ from armory2.armory_main.models import (
 from armory2.armory_main.included.ReportTemplate import ReportTemplate
 import pdb
 
+
 class Report(ReportTemplate):
     """
     This report displays all of the CIDR information, as well as the IP addresses and
     associated domains.
     """
 
-    markdown = ["# ", "## ", "### ", "#### ", "##### ", "###### "]
+    markdown = ["### ", "#### ", "- ", "-- ", "--- ", "---- "]
 
     name = ""
 
@@ -31,18 +32,20 @@ class Report(ReportTemplate):
             else:
                 results[c.org_name] = {c.name: {}}
             for ip in c.ipaddress_set.all():
-                if (args.scope == "passive" and ip.passive_scope) or (
-                    args.scope == "active" and ip.active_scope) or (
-                    args.scope == "all"):
+                if (
+                    (args.scope == "passive" and ip.passive_scope)
+                    or (args.scope == "active" and ip.active_scope)
+                    or (args.scope == "all")
+                ):
                     results[c.org_name][c.name][ip.ip_address] = []
                     for d in ip.domain_set.all():
                         if d.passive_scope:
                             results[c.org_name][c.name][ip.ip_address].append(d.name)
-        
+
         res = []
         if results.get(None, False):
             results[""] = results.pop(None)
-        
+
         # This cleans out any CIDRs that don't have scoped hosts.
         newresults = results.copy()
         for k, v in results.items():
@@ -54,7 +57,7 @@ class Report(ReportTemplate):
                 newresults.pop(k)
 
         results = newresults.copy()
-        
+
         for cidr in sorted(results.keys()):
             if not cidr:
                 res.append("")
