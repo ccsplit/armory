@@ -39,3 +39,4 @@ verify_ssl = true
   django = "*"
   django-picklefield = "*"
   colorama = "*"
+  django-q = "*"

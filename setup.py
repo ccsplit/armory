@@ -74,6 +74,8 @@ setup(
         "termcolor",
         "django",
         "django-picklefield",
+        "django_q",
+        "redis",
     ],
     test_suite="nose.collector",
     tests_require=["nose"],
