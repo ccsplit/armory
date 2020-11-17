@@ -2,7 +2,35 @@
 
 # main.py
 # Django specific settings
+
 import os
+from pkg_resources import resource_string
+
+# Ensuring the Armory config exists before loading the Django stuff.
+
+if os.getenv("ARMORY_HOME"):
+    CONFIG_FOLDER = os.getenv("ARMORY_HOME")
+else:
+    CONFIG_FOLDER = os.path.join(os.getenv("HOME"), ".armory")
+
+if os.getenv("ARMORY_CONFIG"):
+    CONFIG_FILE = os.getenv("ARMORY_CONFIG")
+else:
+    CONFIG_FILE = "settings.py"
+
+if not os.path.exists(CONFIG_FOLDER):
+    os.mkdir(CONFIG_FOLDER)
+if not os.path.exists(os.path.join(CONFIG_FOLDER, CONFIG_FILE)):
+    with open(os.path.join(CONFIG_FOLDER, CONFIG_FILE), "w") as out:
+        out.write(
+            resource_string(
+                "armory2.default_configs", "settings.py"
+            ).decode("UTF-8")
+        )    
+    NEW_CONFIG_FOLDER = True
+else:
+    NEW_CONFIG_FOLDER = False
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "armory2.armory2.settings")
 
 ### Have to do this for it to work in 1.9.x!
@@ -15,7 +43,7 @@ from django.core.management import call_command
 # Your application specific imports
 from armory2.armory_main.models import *
 from django.conf import settings
-
+from django.db.utils import OperationalError
 import argparse
 import argcomplete
 import os
@@ -23,42 +51,26 @@ import pkgutil
 import sys
 import pdb
 from configparser import ConfigParser
-from pkg_resources import resource_string
 
-__version__ = "Armory Version 2.0 Alpha"
+
+__version__ = "Armory Version 2.0 Beta"
 PATH = os.path.dirname(__file__)
-if os.getenv("ARMORY_HOME"):
-    CONFIG_FOLDER = os.getenv("ARMORY_HOME")
-else:
-    CONFIG_FOLDER = os.path.join(os.getenv("HOME"), ".armory")
-
-if os.getenv("ARMORY_CONFIG"):
-    CONFIG_FILE = os.getenv("ARMORY_CONFIG")
-else:
-    CONFIG_FILE = "settings.py"
 
 
 DEFAULTS_DIR = os.path.join(os.path.dirname(__file__), "default_configs")
 
 # call_command('migrate')
 
-def check_and_create_configs():
-    """
-    This is run if there is no config currently setup. It will create a home .armory folder,
-    create a sample base config, and populate sample module configs.
-    """
+def check_database():
+    '''
+    Check and make sure the database is migrated
+    '''
 
-    if not os.path.exists(CONFIG_FOLDER):
-        os.mkdir(CONFIG_FOLDER)
-    if not os.path.exists(os.path.join(CONFIG_FOLDER, CONFIG_FILE)):
-        with open(os.path.join(CONFIG_FOLDER, CONFIG_FILE), "w") as out:
-            out.write(
-                resource_string(
-                    "armory.default_configs", "settings.ini.default"
-                ).decode("UTF-8")
-            )
-
-        generate_default_configs()
+    try:
+        Url.objects.filter(pk=1)
+    except OperationalError:
+        from django.core.management import execute_from_command_line
+        execute_from_command_line(['manage', 'migrate'])
 
 def generate_default_configs():
     config = get_config_options()
@@ -76,16 +88,24 @@ def generate_default_configs():
 
     modules = get_modules(os.path.join(PATH, "armory_main/included/modules"))
     for m in modules:
-        config_options[m] = get_module_options(".armory_main.included.modules." + m, m)
-
+        try:    
+            config_options[m] = get_module_options(".armory_main.included.modules." + m, m)
+        except Exception as e:
+            print(f"Invalid module: {m} failed with error {e}. Skipping")
     if custom_path:
         for c in custom_path:
 
             modules = get_modules(c)
-    for m in modules:
-        config_options[m] = get_module_options(os.path.join(custom_path, m), m)
+            for m in modules:
+                # pdb.set_trace()
+                
+                try:
+                    config_options[m] = get_module_options(os.path.join(c, m), m)
+                except Exception as e:
+                    print(f"Invalid module: {m} failed with error {e}. Skipping")
 
     for m, options in config_options.items():
+        print(f"Creating sample config for {m}.")
         if not os.path.exists(os.path.join(CONFIG_FOLDER, "{}.ini.sample".format(m))):
             c = open(os.path.join(CONFIG_FOLDER, "{}.ini.sample".format(m)), "w")
             c.write("[ModuleSettings]\n\n")
@@ -189,6 +209,8 @@ def get_module_options(module, module_name):
     
     # Load the module
     Module = load_module(module)
+    
+    # pdb.set_trace()
 
     m = Module.Module()
 
@@ -353,8 +375,10 @@ _dM_     _dMM_MM_    _MM_  _MM_  _MM_ YMMMMM9 _MM_         M
 
 
 def main():
+    check_database()
 
-    check_and_create_configs()
+    if NEW_CONFIG_FOLDER:
+        generate_default_configs()
     cmd_args = sys.argv
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--module", help="Use module")

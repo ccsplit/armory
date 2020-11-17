@@ -52,7 +52,7 @@ setup(
         "sqlalchemy",
         "sqlalchemy_mixins",
         "tld",
-        "dnspython",
+        "dnspython < 2.1.0rc1",
         "netaddr",
         "pyperclip",
         "requests",
