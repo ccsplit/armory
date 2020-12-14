@@ -89,7 +89,10 @@ class Module(ModuleTemplate):
 
         self.options.add_argument("--apikey", help="API Key for HunterIO")
 
-        self.options.add_argument("--import_file", help="Import a file from LinkedInt.")
+        self.options.add_argument(
+            "--import_file",
+            help="Import a file from LinkedInt, requires the -d|--domain option.",
+        )
 
     def run(self, args):
         # pdb.set_trace()
