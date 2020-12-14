@@ -15,20 +15,22 @@ import pdb
 def remove_binary(txt):
     return "".join([t for t in txt if t in string.printable])
 
+
 def get_words(txt):
-    clean = ''
+    clean = ""
     res = []
     for l in txt:
         if l in string.ascii_letters:
             clean += l
         else:
-            clean += ' '
-    while '  ' in clean:
-        clean = clean.replace('  ', ' ')
-    for w in clean.split(' '):
+            clean += " "
+    while "  " in clean:
+        clean = clean.replace("  ", " ")
+    for w in clean.split(" "):
         if w:
             res.append(w.lower())
     return res
+
 
 class Module(ModuleTemplate):
 
@@ -78,23 +80,16 @@ class Module(ModuleTemplate):
         self.options.add_argument(
             "--auto_keyword",
             help="Generate a list of keywords from titles already discovered, and search repeatedly using the top x number of results (specified with --top).",
-            action="store_true"
+            action="store_true",
         )
 
-        self.options.add_argument(
-            "--login",
-            help="Login for LinkedIn"
-        )
+        self.options.add_argument("--login", help="Login for LinkedIn")
 
-        self.options.add_argument(
-            "--password",
-            help="Password for LinkedIn"
-        )
+        self.options.add_argument("--password", help="Password for LinkedIn")
 
-        self.options.add_argument(
-            "--apikey",
-            help="API Key for HunterIO"
-        )
+        self.options.add_argument("--apikey", help="API Key for HunterIO")
+
+        self.options.add_argument("--import_file", help="Import a file from LinkedInt.")
 
     def run(self, args):
         # pdb.set_trace()
@@ -111,6 +106,10 @@ class Module(ModuleTemplate):
 
         if args.domain:
             domain, created = BaseDomain.objects.get_or_create(name=args.domain)
+            if args.import_file:
+                self.process_file(args.import_file, domain)
+                return
+
             if args.top:
                 titles = [
                     user.job_title.split(" at ")[0]
@@ -134,40 +133,43 @@ class Module(ModuleTemplate):
 
             if args.auto_keyword:
                 if not args.top:
-                    display_error("You must specify the top number of keywords using --top")
+                    display_error(
+                        "You must specify the top number of keywords using --top"
+                    )
                 else:
-                    if os.path.isfile('/tmp/armory_linkedinsearchqueries'):
-                        blacklist = open('/tmp/armory_linkedinsearchqueries').read().split('\n')
+                    if os.path.isfile("/tmp/armory_linkedinsearchqueries"):
+                        blacklist = (
+                            open("/tmp/armory_linkedinsearchqueries").read().split("\n")
+                        )
                     else:
                         blacklist = []
-                    bfile = open('/tmp/armory_linkedinsearchqueries', 'a')
-                    for w in args.smart_shuffle.split(','):
-                        
+                    bfile = open("/tmp/armory_linkedinsearchqueries", "a")
+                    for w in args.smart_shuffle.split(","):
+
                         if w not in blacklist:
-                            
+
                             args.keywords = w
                             self.process_domain(domain, args)
-                            
-                            bfile.write('{}\n'.format(w))
+
+                            bfile.write("{}\n".format(w))
                         else:
-                            display("Skipped {} due to it already being searched.".format(w))
+                            display(
+                                "Skipped {} due to it already being searched.".format(w)
+                            )
                     bfile.close()
             elif args.smart_shuffle:
                 args.keywords = " OR ".join(
                     ['"{}"'.format(i) for i in args.smart_shuffle.split(",")]
                 )
                 self.process_domain(domain, args)
-                
+
                 args.keywords = " AND ".join(
                     ['-"{}"'.format(i) for i in args.smart_shuffle.split(",")]
                 )
                 self.process_domain(domain, args)
-                
+
             else:
                 self.process_domain(domain, args)
-                
-
-            
 
     def process_domain(self, domain_obj, args):
 
@@ -175,19 +177,17 @@ class Module(ModuleTemplate):
 
         if args.output_path[0] == "/":
             output_path = os.path.join(
-                self.base_config["ARMORY_BASE_PATH"], 'output', args.output_path[1:]
+                self.base_config["ARMORY_BASE_PATH"], "output", args.output_path[1:]
             )
         else:
             output_path = os.path.join(
-                self.base_config["ARMORY_BASE_PATH"], 'output', args.output_path
+                self.base_config["ARMORY_BASE_PATH"], "output", args.output_path
             )
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        file_path = os.path.join(
-            output_path, "%s-linkedint" % domain.replace(".", "_")
-        )
+        file_path = os.path.join(output_path, "%s-linkedint" % domain.replace(".", "_"))
 
         command_args = " -o %s" % file_path
 
@@ -206,7 +206,9 @@ class Module(ModuleTemplate):
             command_args += " -f " + args.email_format
 
         if args.login and args.password:
-            command_args += " --login {} --password {} ".format(args.login, args.password)
+            command_args += " --login {} --password {} ".format(
+                args.login, args.password
+            )
 
         if args.apikey:
             command_args += " --apikey {} ".format(args.apikey)
@@ -223,30 +225,29 @@ class Module(ModuleTemplate):
         subprocess.Popen(cmd).wait()
 
         os.chdir(current_dir)
-        count = 0
-        with open(file_path + ".csv") as csvfile:
-            csvreader = csv.reader(csvfile, delimiter=",", quotechar='"')
+        self.process_file(file_path, domain)
 
+    def process_file(self, file_path, domain_obj):
+        count = 0
+        if not file_path.endswith(".csv"):
+            file_path += ".csv"
+        with open(file_path) as csvfile:
+            csvreader = csv.reader(csvfile, delimiter=",", quotechar='"')
             for row in csvreader:
                 count += 1
-                
                 user, created = User.objects.get_or_create(
-                        email=remove_binary(row[3]), defaults={"domain":domain_obj}
-                    )
+                    email=remove_binary(row[3]), defaults={"domain": domain_obj}
+                )
 
                 user.first_name = remove_binary(row[0])
-                user.last_name = remove_binary(row[1]).split(',')[0]
+                user.last_name = remove_binary(row[1]).split(",")[0]
                 user.job_title = remove_binary(row[4])
                 user.location = remove_binary(row[5])
 
-                
-
                 print(
-                    "New user: %s %s"
-                    % (remove_binary(row[0]), remove_binary(row[1]))
+                    "New user: %s %s" % (remove_binary(row[0]), remove_binary(row[1]))
                 )
-                user.meta['LinkedInt'] = "run"
+                user.meta["LinkedInt"] = "run"
                 user.save()
 
         print("%s found and imported" % count)
-        
