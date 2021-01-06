@@ -76,6 +76,7 @@ setup(
         "django-picklefield",
         "django_q",
         "redis",
+        "xlsxwriter",
     ],
     test_suite="nose.collector",
     tests_require=["nose"],
@@ -84,7 +85,7 @@ setup(
     # You can install these with the following syntax:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["check-manifest", "tox"],
+        "dev": ["check-manifest", "tox", "black"],
         "test": ["coverage", "mock; python_version < '3.4'"],
     },
     # To provide executable scripts, use entry points in preference to the
