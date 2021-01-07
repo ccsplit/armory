@@ -6,11 +6,11 @@ from armory2.armory_main.included.utilities.get_urls import add_tool_url
 
 import pdb
 
+
 class Module(ToolTemplate):
 
     name = "SSLScan"
     binary_name = "sslscan"
-
 
     def set_options(self):
         super(Module, self).set_options()
@@ -72,7 +72,9 @@ class Module(ToolTemplate):
                 for p in ["https", "ftps", "imaps", "sip-tls", "imqtunnels", "smtps"]:
                     svc += [
                         (s, "")
-                        for s in Port.objects.all().filter(service_name=p, status="open")
+                        for s in Port.objects.all().filter(
+                            service_name=p, status="open"
+                        )
                         if s.ip_address.active_scope
                     ]
                 for p in [
@@ -88,17 +90,22 @@ class Module(ToolTemplate):
                 ]:
                     svc += [
                         (s, "--starttls-%s" % p)
-                        for s in Port.objects.all().filter(service_name=p, status="open")
+                        for s in Port.objects.all().filter(
+                            service_name=p, status="open"
+                        )
                         if s.ip_address.active_scope
                     ]
             else:
                 for p in ["https", "ftps", "imaps", "sip-tls", "imqtunnels", "smtps"]:
                     for s in Port.objects.all().filter(service_name=p, status="open"):
 
-                        if ((self.ip_address.active_scope) and (self.name not in s.ip_address.tools.keys() or "{}-".format(s.port_number) not in s.ip_address.tools[self.name])):
+                        if (s.ip_address.active_scope) and (
+                            self.name not in s.ip_address.tools.keys()
+                            or "{}-".format(s.port_number)
+                            not in s.ip_address.tools[self.name]
+                        ):
                             svc.append([s, ""])
-                        
-                        
+
                 for p in [
                     "ftp",
                     "imap",
@@ -112,10 +119,13 @@ class Module(ToolTemplate):
                 ]:
                     for s in Port.objects.all().filter(service_name=p, status="open"):
 
-                        if ((self.ip_address.active_scope) and (self.name not in s.ip_address.tools.keys() or "{}-".format(s.port_number) not in s.ip_address.tools[self.name])):
+                        if (s.ip_address.active_scope) and (
+                            self.name not in s.ip_address.tools.keys()
+                            or "{}-".format(s.port_number)
+                            not in s.ip_address.tools[self.name]
+                        ):
                             svc.append([s, "--starttls-%s" % p])
-                    
-            
+
             for s, option in svc:
 
                 port_number = s.port_number
@@ -160,7 +170,6 @@ class Module(ToolTemplate):
         return cmd
 
     def process_output(self, targets):
-        
-        for t in targets:
-            add_tool_url(url="url://{}".format(t['target']), tool=self.name, args="")
 
+        for t in targets:
+            add_tool_url(url="url://{}".format(t["target"]), tool=self.name, args="")
