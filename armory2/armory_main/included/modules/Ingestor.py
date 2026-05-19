@@ -239,8 +239,8 @@ class Module(ModuleTemplate):
                 name=line.strip(),
                 defaults={
                     "org_name": label,
-                    "active_scope": True,
-                    "passive_scope": True,
+                    "active_scope": self.active_scope,
+                    "passive_scope": self.passive_scope,
                 },
             )
             if created:
@@ -256,7 +256,7 @@ class Module(ModuleTemplate):
             for c in cidrs:
 
                 cidr, created = CIDR.objects.get_or_create(
-                    name=str(c), defaults={"active_scope": True, "passive_scope": True}
+                    name=str(c), defaults={"active_scope": self.active_scope, "passive_scope": self.passive_scope}
                 )
                 if created:
                     display_new("Adding %s to Active CIDRs in database" % line.strip())
