@@ -96,6 +96,9 @@ class Module(ModuleTemplate):
 
         self.active_scope = args.active
         self.passive_scope = args.passive
+        if self.active_scope:
+            # Set Passive scope to True if Active scope is True
+            self.passive_scope = self.active_scope
         badchars = re.compile('[@_!#$%^&*()<>?\|}{~:]')
         if args.descope:
             if (badchars.search(args.descope) == None):
