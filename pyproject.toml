@@ -52,6 +52,7 @@ name = "armory2"
 
 [tool.poetry]
 version = "3.0"
+packages = [{include = "armory2"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<=3.14"
