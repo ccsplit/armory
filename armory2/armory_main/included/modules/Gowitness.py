@@ -164,86 +164,88 @@ class Module(ToolTemplate):
             os.chdir(output)
 
             # subprocess.Popen(cmd, shell=False).wait()
+            try:
+                conn = sqlite3.connect(os.path.join(output, "gowitness.sqlite3"))
 
-            conn = sqlite3.connect(os.path.join(output, "gowitness.sqlite3"))
-
-            cr = conn.cursor()
-            sql = """
-                select u.url, d.value from tls_san_lists as d
-                inner join tls as c on c.id = d.tls_id              
-                inner join results as u on u.id = c.result_id
-            """
-            domain_data = cr.execute(sql).fetchall()
-            domains = sorted(
-                list(
-                    set([d[1] for d in domain_data if "." in d[1] and "*" not in d[1]])
+                cr = conn.cursor()
+                sql = """
+                    select u.url, d.value from tls_san_lists as d
+                    inner join tls as c on c.id = d.tls_id              
+                    inner join results as u on u.id = c.result_id
+                """
+                domain_data = cr.execute(sql).fetchall()
+                domains = sorted(
+                    list(
+                        set([d[1] for d in domain_data if "." in d[1] and "*" not in d[1]])
+                    )
                 )
-            )
-            for name in domains:
-                domain, created = Domain.objects.get_or_create(name=name.lower())
+                for name in domains:
+                    domain, created = Domain.objects.get_or_create(name=name.lower())
 
-            url_domain_data = {}
-            # display(f"Discovered {len(domains)} unique domain names")
-            for d, n in domain_data:
-                if not url_domain_data.get(d):
-                    url_domain_data[d] = []
-                if n not in url_domain_data[d]:
-                    url_domain_data[d].append(n)
+                url_domain_data = {}
+                # display(f"Discovered {len(domains)} unique domain names")
+                for d, n in domain_data:
+                    if not url_domain_data.get(d):
+                        url_domain_data[d] = []
+                    if n not in url_domain_data[d]:
+                        url_domain_data[d].append(n)
 
-            for u in cr.execute(
-                "select id, url, filename, final_url, response_code from results"
-            ).fetchall():
-                # pdb.set_trace()
-                port = get_port_object(u[1])
-                if not port:
-                    display_error("Port not found: {}".format(u[1]))
-                else:
-                    if not port.meta.get("Gowitness"):
-                        port.meta["Gowitness"] = []
+                for u in cr.execute(
+                    "select id, url, filename, final_url, response_code from results"
+                ).fetchall():
+                    # pdb.set_trace()
+                    port = get_port_object(u[1])
+                    if not port:
+                        display_error("Port not found: {}".format(u[1]))
+                    else:
+                        if not port.meta.get("Gowitness"):
+                            port.meta["Gowitness"] = []
 
-                    data = {
-                        "screenshot_file": os.path.join(output, u[2]),
-                        "final_url": u[3],
-                        "response_code_string": str(u[4]),
-                        "headers": [
-                            {"key": k[0], "value": k[1]}
-                            for k in cr.execute(
-                                "select key, value from headers where result_id = ?",
-                                (u[0],),
+                        data = {
+                            "screenshot_file": os.path.join(output, u[2]),
+                            "final_url": u[3],
+                            "response_code_string": str(u[4]),
+                            "headers": [
+                                {"key": k[0], "value": k[1]}
+                                for k in cr.execute(
+                                    "select key, value from headers where result_id = ?",
+                                    (u[0],),
+                                )
+                            ],
+                            "cert": {"dns_names": url_domain_data.get(u[1], [])},
+                        }
+
+                        for dmn in url_domain_data.get(u[1], []):
+                            dn, created = VirtualHost.objects.get_or_create(
+                                ip_address=port.ip_address, name=dmn, port=port
                             )
-                        ],
-                        "cert": {"dns_names": url_domain_data.get(u[1], [])},
-                    }
 
-                    for dmn in url_domain_data.get(u[1], []):
-                        dn, created = VirtualHost.objects.get_or_create(
-                            ip_address=port.ip_address, name=dmn, port=port
-                        )
+                        port.meta["Gowitness"].append(data)
 
-                    port.meta["Gowitness"].append(data)
+                        port.save()
+                # for d in data:
+                #     if '{"url"' in d:
 
-                    port.save()
-            # for d in data:
-            #     if '{"url"' in d:
+                #         j = json.loads(d)
 
-            #         j = json.loads(d)
+                #         port = get_port_object(j['url'])
+                #         if not port:
+                #             display_error("Port not found: {}".format(j['url']))
+                #         else:
+                #             if not port.meta.get('Gowitness'):
+                #                 port.meta['Gowitness'] = []
 
-            #         port = get_port_object(j['url'])
-            #         if not port:
-            #             display_error("Port not found: {}".format(j['url']))
-            #         else:
-            #             if not port.meta.get('Gowitness'):
-            #                 port.meta['Gowitness'] = []
+                #             port.meta['Gowitness'].append(j)
+                #             port.save()
 
-            #             port.meta['Gowitness'].append(j)
-            #             port.save()
+                #             if j.get('ssl_certificate') and 'peer_certificates' in j['ssl_certificate'] and j['ssl_certificate']['peer_certificates'] != None:
+                #                 for cert in j['ssl_certificate']['peer_certificates']:
+                #                     if cert and cert.get('dns_names') and cert['dns_names'] != None:
+                #                         for name in cert['dns_names']:
 
-            #             if j.get('ssl_certificate') and 'peer_certificates' in j['ssl_certificate'] and j['ssl_certificate']['peer_certificates'] != None:
-            #                 for cert in j['ssl_certificate']['peer_certificates']:
-            #                     if cert and cert.get('dns_names') and cert['dns_names'] != None:
-            #                         for name in cert['dns_names']:
-
-            os.chdir(cwd)
+                os.chdir(cwd)
+            except sqlite3.OperationalError as ex:
+                print(f"Did not get any gotwitness information for {cmd['target']}")
 
         # add_tools_urls(scope_type="active", tool=self.name, args=self.args.tool_args)
 
