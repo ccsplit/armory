@@ -35,8 +35,11 @@ def get_docker_run(obj):
 
     base_path = config['ARMORY_BASE_PATH']
     docker_extra = config.get('DOCKER_FOLDERS', '')
+    docker_path = base_path
+    if not docker_path.startswith("/"):
+        docker_path = f"/{docker_path}"
 
-    binary = f"docker run -it --rm {obj.args.docker_options[1:-1]} {docker_extra} -v \"{base_path}:{base_path}\" {obj.docker_name} "
+    binary = f"docker run -it --rm {obj.args.docker_options[1:-1]} {docker_extra} -v \"{base_path}:{docker_path}\" {obj.docker_name} "
 
     if hasattr(obj, 'docker_run_binary'):
         binary += f" {obj.docker_run_binary}"
