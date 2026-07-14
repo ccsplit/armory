@@ -48,6 +48,8 @@ def get_docker_run(obj):
 
 def get_binary(obj, args):
     use_docker = False
+    if args.no_binary:
+        return None
 
     if obj.docker_name and obj.use_docker:
         binary = get_docker_run(obj)
@@ -75,8 +77,6 @@ def get_binary(obj, args):
         binary = get_docker_run(obj)
         return binary
 
-    if args.no_binary:
-        return None
     raise Exception(
         "%s binary not found. Please explicitly provide path with --binary"
         % self.name

@@ -67,10 +67,16 @@ class Module(ToolTemplate):
         self.options.add_argument(
             "--counter_max", help="Max number of screenshots per host", default="20"
         )
+        self.options.add_argument(
+            "--process-folder", help="Process a Gowitness output folder"
+        )
 
     def get_targets(self, args):
         timestamp = str(int(time()))
         targets = []
+        if args.process_folder:
+            args.no_binary = True
+            return [{"target": "", "output": args.process_folder}]
         if args.import_file:
             targets += [t for t in open(args.import_file).read().split("\n") if t]
 
@@ -156,12 +162,12 @@ class Module(ToolTemplate):
 
         for cmd in cmds:
             output = cmd["output"]
-            for t in open(cmd["target"]).read().split("\n"):
-                if t:
-                    display(f"Adding {t} with {self.args.tool_args if self.args.tool_args else 'no tool args'}")
-                    add_tool_url(t, tool=self.name, args=self.args.tool_args)
+            if cmd.get("target"):
+                for t in open(cmd["target"]).read().split("\n"):
+                    if t:
+                        display(f"Adding {t} with {self.args.tool_args if self.args.tool_args else 'no tool args'}")
+                        add_tool_url(t, tool=self.name, args=self.args.tool_args)
             # cmd = [self.binary] + gen_command
-            os.chdir(output)
 
             # subprocess.Popen(cmd, shell=False).wait()
             try:
@@ -243,9 +249,8 @@ class Module(ToolTemplate):
                 #                     if cert and cert.get('dns_names') and cert['dns_names'] != None:
                 #                         for name in cert['dns_names']:
 
-                os.chdir(cwd)
             except sqlite3.OperationalError as ex:
-                print(f"Did not get any gotwitness information for {cmd['target']}")
+                print(f"Did not get any gotwitness information for {cmd['output']}")
 
         # add_tools_urls(scope_type="active", tool=self.name, args=self.args.tool_args)
 
