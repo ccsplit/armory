@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from armory2.armory_main.models import Port, Domain, IPAddress, Vulnerability, Tag, VirtualHost
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 from django.template.defaulttags import register
 import os
 from base64 import b64encode
@@ -171,6 +171,24 @@ def index(request):
     })
 
 
+def _resolve_tool_output(path):
+    """Map a stored tool-output path onto the current ARMORY_BASE_PATH.
+
+    Output paths are recorded as absolute at scan time, so a project that was
+    copied to another host (or whose base path was renamed) no longer resolves.
+    Re-base on the final component of the configured base path when the stored
+    path still contains it; otherwise return None so callers can skip the file.
+    """
+    if os.path.exists(path):
+        return path
+
+    base = os.path.expanduser(ARMORY_CONFIG['ARMORY_BASE_PATH'])
+    marker = os.path.basename(base.rstrip('/')) + os.sep
+    if marker in path:
+        return os.path.join(base, path.split(marker, 1)[1])
+    return None
+
+
 def _build_port_data(ip, display_zero, nessus, gowitness, ffuf):
     """Collect tool button data for all ports on one IP. Returns (has_ports, data, nmap, nuclei).
 
@@ -256,9 +274,8 @@ def _build_port_data(ip, display_zero, nessus, gowitness, ffuf):
             if 'FFuF' not in data[target_id] and 'FFuF-empty' not in data[target_id]:
                 ffuf_good = False
                 for f in p.meta['FFuF']:
-                    rel = f.split('armory2/')[1]
-                    abs_path = os.path.join(ARMORY_CONFIG['ARMORY_BASE_PATH'], rel)
-                    if os.path.exists(abs_path):
+                    abs_path = _resolve_tool_output(f)
+                    if abs_path and os.path.exists(abs_path):
                         res = json.load(open(abs_path))
                         if res['results']:
                             ffuf_good = True
@@ -310,6 +327,7 @@ def get_hosts(request):
         scope_type=scope_type, search=search,
         display_zero=display_zero, page_num=page, entries=entries,
         tag_filter=tag_filter, vuln_source=vuln_source,
+        completed=None if display_complete else False,
     )
 
     page_data = _make_page_data(page, total, entries)
@@ -319,14 +337,15 @@ def get_hosts(request):
     nuclei_inline = {}
     good_ips = []
 
+    # Every visibility decision belongs in get_sorted above, so that `total` and
+    # the pager agree with what is rendered. Dropping rows here instead would
+    # short the page and overstate the page count.
     for ip in ips:
-        if display_complete or not ip.completed:
-            has_ports, pd, nm, nu = _build_port_data(ip, display_zero, nessus, gowitness, ffuf)
-            if has_ports:
-                good_ips.append(ip)
-                data.update(pd)
-                nmap_inline.update(nm)
-                nuclei_inline.update(nu)
+        _, pd, nm, nu = _build_port_data(ip, display_zero, nessus, gowitness, ffuf)
+        good_ips.append(ip)
+        data.update(pd)
+        nmap_inline.update(nm)
+        nuclei_inline.update(nu)
 
     return render(request, 'host_summary/host_results.html', {
         'ips': good_ips,
@@ -349,10 +368,18 @@ def _get_hosts_by_domain(request, scope_type, search, page, entries,
     elif scope_type == 'passive':
         qry = qry.filter(passive_scope=True)
 
+    # Restrict to domains that own at least one IP the loop below will actually
+    # render. Exists() keeps every condition on the *same* IP, and keeps the
+    # decision in the queryset so `total` and the pager match the page.
+    renderable_ip = IPAddress.objects.filter(domain=OuterRef('pk'))
     if display_zero:
-        qry = qry.filter(ip_addresses__isnull=False).distinct()
+        renderable_ip = renderable_ip.filter(port__isnull=False)
     else:
-        qry = qry.filter(ip_addresses__port__port_number__gt=0).distinct()
+        renderable_ip = renderable_ip.filter(port__port_number__gt=0)
+    if not display_complete:
+        # `completed` is nullable — NULL means not completed here.
+        renderable_ip = renderable_ip.exclude(completed=True)
+    qry = qry.filter(Exists(renderable_ip)).distinct()
 
     if search:
         qry = qry.filter(
@@ -388,20 +415,32 @@ def _get_hosts_by_domain(request, scope_type, search, page, entries,
                     nuclei_inline.update(nu)
         domain_ip_map[domain.id] = good_ips
 
+    # These buckets must cover every domain on the page. Under scope='all' a
+    # domain with neither flag set reaches here, and dropping it would hide a
+    # row the pager has already counted.
     active_entries = [
         {'domain': d, 'ips': domain_ip_map[d.id]}
-        for d in domains if d.active_scope and domain_ip_map[d.id]
+        for d in domains if d.active_scope
     ]
     passive_entries = [
         {'domain': d, 'ips': domain_ip_map[d.id]}
-        for d in domains if not d.active_scope and d.passive_scope and domain_ip_map[d.id]
+        for d in domains if not d.active_scope and d.passive_scope
+    ]
+    unscoped_entries = [
+        {'domain': d, 'ips': domain_ip_map[d.id]}
+        for d in domains if not d.active_scope and not d.passive_scope
     ]
 
     groups = []
     if active_entries:
-        groups.append({'label': 'Active', 'entries': active_entries})
+        groups.append({'label': 'Active', 'heading': 'Active Scope',
+                       'entries': active_entries})
     if passive_entries:
-        groups.append({'label': 'Passive', 'entries': passive_entries})
+        groups.append({'label': 'Passive', 'heading': 'Passive Scope',
+                       'entries': passive_entries})
+    if unscoped_entries:
+        groups.append({'label': 'Unscoped', 'heading': 'Unscoped',
+                       'entries': unscoped_entries})
 
     return render(request, 'host_summary/domain_results.html', {
         'groups': groups,
@@ -560,9 +599,8 @@ def get_ffuf(request, port_id):
     ffuf_data = {}
 
     for f in port.meta['FFuF']:
-        rel = f.split('armory2/')[1]
-        abs_path = os.path.join(ARMORY_CONFIG['ARMORY_BASE_PATH'], rel)
-        if not os.path.exists(abs_path):
+        abs_path = _resolve_tool_output(f)
+        if not abs_path or not os.path.exists(abs_path):
             continue
         data = json.loads(open(abs_path).read())
 
