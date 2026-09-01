@@ -79,7 +79,7 @@ def get_binary(obj, args):
 
     raise Exception(
         "%s binary not found. Please explicitly provide path with --binary"
-        % self.name
+        % obj.name
     )
 
 class ModuleTemplate(object):
